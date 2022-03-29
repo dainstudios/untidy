@@ -3,9 +3,10 @@ import pandas as pd
 import numpy as np
 import random
 
-""" Column-wise contaminators """
+""" Helpers """
 
-def data_check(data):
+
+def get_data_dims(data):
     """
     Check input data
 
@@ -26,14 +27,15 @@ def data_check(data):
         col_idxs = 2
 
     elif isinstance(data, pd.DataFrame):
-        row_idxs, col_idxs = data.shape 
-        
+        row_idxs, col_idxs = data.shape
+
     else:
-        raise TypeError('data should be pd.Series or pd.DataFrame')
+        raise TypeError("data should be pd.Series or pd.DataFrame")
 
     return row_idxs, col_idxs
 
-def random_indices(row_idxs, col_idxs, corruption_level = 4):
+
+def get_random_indices(row_idxs, col_idxs, corruption_level=4):
     """
     Get random indeces to contaminate
 
@@ -53,15 +55,18 @@ def random_indices(row_idxs, col_idxs, corruption_level = 4):
     """
 
     # define amount of missing values to introduce
-    missing_count = int(row_idxs * col_idxs * corruption_level/10)
+    missing_count = int(row_idxs * col_idxs * corruption_level / 10)
 
     # generate randomized missing values indeces
     nan_idxs = []
     while len(nan_idxs) < missing_count:
         if col_idxs > 1:
-            idx_pair = (random.randint(0, row_idxs-1), random.randint(0, col_idxs-1))
+            idx_pair = (
+                random.randint(0, row_idxs - 1),
+                random.randint(0, col_idxs - 1),
+            )
         else:
-            idx_pair = (random.randint(0, row_idxs-1), )
+            idx_pair = (random.randint(0, row_idxs - 1),)
 
         if idx_pair not in nan_idxs:
             nan_idxs.append(idx_pair)
@@ -69,10 +74,52 @@ def random_indices(row_idxs, col_idxs, corruption_level = 4):
     return nan_idxs
 
 
+""" Functions to contaminate text columns """
 
-""" Functions to contaminate any columns: """
 
-def nan_values(clean_data, corruption_level = 4):
+def add_noise_to_strings(clean_data, corruption_level=4):
+    """
+    Introduce noise to strings in clean data
+
+    Parameters
+    ----------
+    clean_data: pd.Series or pd.DataFrame
+        data to be contaminated with superfluous characters
+    corruption_level: int, optional
+        level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
+        is the highest level of contamination
+
+    Returns
+    -------
+    contaminated data as pd.DataFrame
+    """
+    data = clean_data.copy()
+
+    # Get text columns
+    if isinstance(data, pd.DataFrame):
+        str_cols = list(data.select_dtypes(include=["category", "object"]).columns)
+        data = data[str_cols]
+
+    # Get data shape
+    num_rows, num_cols = get_data_dims(data)
+    idxs_to_contaminate = get_random_indices(
+        num_rows, num_cols, corruption_level=corruption_level
+    )
+
+    # Perform contamination
+
+    return data_contaminated
+
+
+def change_str_encoding(clean_data, corruption_level=4):
+    """Changes the string encoding for some columns of a dataframe"""
+    # TODO
+
+
+""" Functions to contaminate any column """
+
+
+def nan_values(clean_data, corruption_level=4):
     """
     Introduce missing values in clean data
 
@@ -90,42 +137,30 @@ def nan_values(clean_data, corruption_level = 4):
 
     """
     data = clean_data.copy()
-    
+
     row_idxs, col_idxs = data_check(data)
 
-    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level = corruption_level)
+    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level=corruption_level)
 
     # insert missing values
     for x, y in nan_idxs:
         if isinstance(data, pd.DataFrame):
-            data.iloc[x:x+1, y:y+1] = np.nan
+            data.iloc[x : x + 1, y : y + 1] = np.nan
         else:
             data[x] = np.nan
 
     return data
 
 
-def contaminate_strings_with_noise(a, corruption_level=4):
-    """
-    Contaminate an array with extra characters.
-
-    Parameters
-    ----------
-    a: np.array, pd.Series or list
-        column of the dataset to be contaminated
-    corruption_level: int, optional
-        level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
-        is the highest level of contamination
-    """
-    a_contaminated = a.copy()
-
-    # Perform contamination
-
-    return a_contaminated
+""" Functions to contaminate numerical columns """
 
 
-""" Functions to contaminate numerical columns: """
-def add_outliers(clean_data, corruption_level = 4):
+def change_to_str(clean_data, corruption_level=4):
+    """Changes the dtype of some datapoints in some numeric columns to strings"""
+    # TODO
+
+
+def add_outliers(clean_data, corruption_level=4):
     """
     Contaminate data with obvious outliers
 
@@ -146,35 +181,39 @@ def add_outliers(clean_data, corruption_level = 4):
 
     # get numerical columns
     if isinstance(data, pd.DataFrame):
-        num_cols = list(data.select_dtypes(include = np.number).columns)
+        num_cols = list(data.select_dtypes(include=np.number).columns)
         data = data[num_cols]
-        num_limits = {col:(data[col].min(),data[col].max()) for col in num_cols}
+        num_limits = {col: (data[col].min(), data[col].max()) for col in num_cols}
     else:
         num_limits = (data.min(), data.max())
 
     # get data shape
     row_idxs, col_idxs = data_check(data)
 
-    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level = corruption_level)
- 
+    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level=corruption_level)
+
     # random sign function
     coin_flip = lambda: 1 if random.random() > 0.5 else -1
-    
+
     # contaminate data
     for x, y in nan_idxs:
 
         coin = coin_flip()
 
-        if coin>0:
+        if coin > 0:
             # +/- 100 times the max
             if isinstance(data, pd.DataFrame):
-                data.iloc[x:x+1, y:y+1] = coin_flip() * num_limits[num_cols[y]][1] * 100
+                data.iloc[x : x + 1, y : y + 1] = (
+                    coin_flip() * num_limits[num_cols[y]][1] * 100
+                )
             else:
                 data[x] = coin_flip() * num_limits[1] * 100
         else:
             # +/- 100 times the min
             if isinstance(data, pd.DataFrame):
-                data.iloc[x:x+1, y:y+1] = coin_flip() * num_limits[num_cols[y]][0] * 100
+                data.iloc[x : x + 1, y : y + 1] = (
+                    coin_flip() * num_limits[num_cols[y]][0] * 100
+                )
             else:
                 data[x] = coin_flip() * num_limits[0] * 100
 
@@ -183,5 +222,5 @@ def add_outliers(clean_data, corruption_level = 4):
         data_raw[num_cols] = data[num_cols]
     else:
         data_raw = data
-        
+
     return data_raw
