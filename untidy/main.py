@@ -16,5 +16,7 @@ def run(data, corruption_level=4):
     # Read dataset
 
     # Contaminate
+    data_nan = nan_values(data, corruption_level = corruption_level)
+    data_outlier = add_outliers(data, corruption_level = corruption_level)
 
     # Save / return

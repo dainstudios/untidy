@@ -102,7 +102,6 @@ def nan_values(clean_data, corruption_level = 4):
         else:
             data[x] = np.nan
 
-    print(data)
     return data
 
 
@@ -185,8 +184,4 @@ def add_outliers(clean_data, corruption_level = 4):
     else:
         data_raw = data
         
-    print(data_raw)
     return data_raw
-
-
-""" Functions to contaminate string columns: """
