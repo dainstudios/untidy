@@ -1,2 +1,2 @@
-# untidy
-Python package for data uncleaning
+# Untidy
+A Python package for data uncleaning.
