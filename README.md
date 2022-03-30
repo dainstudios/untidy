@@ -16,3 +16,4 @@ messy_df = untidy(clean_df,
 * **Install:** TBA 
 
 
+![DAIN logo](https://github.com/dainstudios/untidy/blob/main/resources/dain-logo.svg)
