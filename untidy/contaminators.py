@@ -254,10 +254,9 @@ def change_numeric_to_str(clean_data, corruption_level=4):
 """ Functions to contaminate any column """
 
 
-def nan_values(clean_data, corruption_level=4):
+def add_nans(clean_data, corruption_level=4):
     """
     Introduce missing values in clean data
-
     Parameters
     ----------
     clean_data: pd.Series or pd.DataFrame
@@ -265,22 +264,21 @@ def nan_values(clean_data, corruption_level=4):
     corruption_level: int, optional
         level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
         is the highest level of contamination
-
     Returns
     -------
-    contaminated data as pd.DataFrame
-
+    contaminated data as pd.DataFrame or pd.Series
     """
     data = clean_data.copy()
 
-    row_idxs, col_idxs = data_check(data)
+    # Find random data cells to contaminate
+    nan_idxs = get_random_indices(
+        data, coltype="any", corruption_level=corruption_level
+    )
 
-    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level=corruption_level)
-
-    # insert missing values
+    # Insert missing values
     for x, y in nan_idxs:
         if isinstance(data, pd.DataFrame):
-            data.iloc[x : x + 1, y : y + 1] = np.nan
+            data.iloc[x, y] = np.nan
         else:
             data[x] = np.nan
 
