@@ -1,7 +1,7 @@
 from contaminators import *
 
 
-def run(data, corruption_level=4):
+def run(clean_data, corruption_level=4):
     """
     Contaminate a dataset with various types of data issues.
 
@@ -16,7 +16,8 @@ def run(data, corruption_level=4):
     # Read dataset
 
     # Contaminate
-    data_nan = nan_values(data, corruption_level = corruption_level)
-    data_outlier = add_outliers(data, corruption_level = corruption_level)
+    data = clean_data.copy()
+    data = add_nans(data, corruption_level = corruption_level)
+    data = add_outliers(data, corruption_level = corruption_level)
 
     # Save / return

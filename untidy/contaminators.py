@@ -17,22 +17,22 @@ def get_data_dims(data):
 
     Returns
     -------
-    row_idxs, col_idxs: int(s)
+    num_rows, num_cols: int(s)
         integers specifying, respectively, the amount of rows and columns in data.
         These values will be passed to *random_indeces* in order to generate the indeces to be contaminated
 
     """
     if isinstance(data, pd.Series):
-        row_idxs = data.shape[0]
-        col_idxs = 2
+        num_rows = data.shape[0]
+        num_cols = 1
 
     elif isinstance(data, pd.DataFrame):
-        row_idxs, col_idxs = data.shape
+        num_rows, num_cols = data.shape
 
     else:
         raise TypeError("data should be pd.Series or pd.DataFrame")
 
-    return row_idxs, col_idxs
+    return num_rows, num_cols
 
 
 """ Functions to contaminate text columns """
@@ -126,10 +126,7 @@ def change_str_encoding(clean_data, corruption_level=4):
     return data
 
 
-""" Functions to contaminate any column """
-
-
-def nan_values(clean_data, corruption_level=4):
+def add_nans(clean_data, corruption_level=4):
     """
     Introduce missing values in clean data
 
@@ -143,14 +140,15 @@ def nan_values(clean_data, corruption_level=4):
 
     Returns
     -------
-    contaminated data as pd.DataFrame
+    contaminated data as pd.DataFrame or pd.Series
 
     """
     data = clean_data.copy()
+    print(data)
 
-    row_idxs, col_idxs = data_check(data)
+    num_rows, num_cols = get_data_dims(data)
 
-    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level=corruption_level)
+    nan_idxs = get_random_indices(num_rows, num_cols, corruption_level=corruption_level)
 
     # insert missing values
     for x, y in nan_idxs:
@@ -159,6 +157,7 @@ def nan_values(clean_data, corruption_level=4):
         else:
             data[x] = np.nan
 
+    print(data)
     return data
 
 
@@ -261,51 +260,60 @@ def add_outliers(clean_data, corruption_level=4):
 
     """
 
-    data_raw = clean_data.copy()
-    data = data_raw.copy()
+    # data_raw = clean_data.copy()
+    data = clean_data.copy()
+
+    print(data)
 
     # get numerical columns
     if isinstance(data, pd.DataFrame):
-        num_cols = list(data.select_dtypes(include=np.number).columns)
-        data = data[num_cols]
-        num_limits = {col: (data[col].min(), data[col].max()) for col in num_cols}
+        numeric_col = list(data.select_dtypes(include=np.number).columns)
+        data = data[numeric_col]
+        num_limits = {col: (data[col].min(), data[col].max()) for col in numeric_col}
     else:
         num_limits = (data.min(), data.max())
 
     # get data shape
-    row_idxs, col_idxs = data_check(data)
+    num_rows, num_cols = get_data_dims(data)
 
-    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level=corruption_level)
+    ol_idxs = get_random_indices(num_rows, num_cols, corruption_level=corruption_level)
 
     # random sign function
     coin_flip = lambda: 1 if random.random() > 0.5 else -1
 
     # contaminate data
-    for x, y in nan_idxs:
+    for x, y in ol_idxs:
 
         coin = coin_flip()
-
         if coin > 0:
-            # +/- 100 times the max
+            # +100 times the max(1, max_value)
             if isinstance(data, pd.DataFrame):
                 data.iloc[x : x + 1, y : y + 1] = (
-                    coin_flip() * num_limits[num_cols[y]][1] * 100
+                    num_limits[numeric_col[y]][1]
+                    + max(num_limits[numeric_col[y]][1], 1) * 1000
                 )
             else:
-                data[x] = coin_flip() * num_limits[1] * 100
+                data[x] = num_limits[1] + max(1, num_limits[1]) * 1000
         else:
-            # +/- 100 times the min
+            # - 100 times min(-1, min_value)
             if isinstance(data, pd.DataFrame):
                 data.iloc[x : x + 1, y : y + 1] = (
-                    coin_flip() * num_limits[num_cols[y]][0] * 100
+                    num_limits[numeric_col[y]][0]
+                    - max(num_limits[numeric_col[y]][0], 1) * 1000
                 )
             else:
-                data[x] = coin_flip() * num_limits[0] * 100
+                data[x] = num_limits[0] - max(num_limits[0], 1) * 1000
 
     # add contamination to original dataframe
-    if isinstance(data, pd.DataFrame):
-        data_raw[num_cols] = data[num_cols]
-    else:
-        data_raw = data
 
-    return data_raw
+    if isinstance(data, pd.DataFrame):
+        data_contaminated = clean_data.copy()
+        data_contaminated[numeric_col] = data[numeric_col]
+    else:
+        data_contaminated = data
+
+    print(data_contaminated)
+
+    return data_contaminated
+
+    """ Functions to contaminate string columns: """
