@@ -35,6 +35,49 @@ def get_data_dims(data):
     return num_rows, num_cols
 
 
+def get_random_indices(data, coltype="any", corruption_level=4):
+    """
+    Get random indeces to contaminate
+
+    Parameters
+    ----------
+    row_idxs: int
+        number of rows in data to contaminate
+    col_idxs: int
+        number of columns in data to contaminate
+    coltype:  str, optional
+        type of column
+    corruption_level int, optional
+        level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
+        is the highest level of contamination
+
+    Returns
+    -------
+    list of indeces to be contaminated
+    """
+
+    # define amount of missing values to introduce
+    num_obs = data.shape[0] * data.shape[1]
+    prop_contaminated = np.linspace(0, 0.6, 11)[corruption_level]
+    num_contaminated = int(prop_contaminated * num_obs)
+
+    # generate randomized missing values indeces
+    nan_idxs = []
+    while len(nan_idxs) < missing_count:
+        if col_idxs > 1:
+            idx_pair = (
+                random.randint(0, row_idxs - 1),
+                random.randint(0, col_idxs - 1),
+            )
+        else:
+            idx_pair = (random.randint(0, row_idxs - 1),)
+
+        if idx_pair not in nan_idxs:
+            nan_idxs.append(idx_pair)
+
+    return nan_idxs
+
+
 """ Functions to contaminate text columns """
 
 
