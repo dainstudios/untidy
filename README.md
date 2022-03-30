@@ -17,3 +17,4 @@ messy_df = untidy(clean_df,
 
 
 ![DAIN logo](https://github.com/dainstudios/untidy/blob/main/resources/dain-logo.svg)
+<img src="https://github.com/dainstudios/untidy/blob/main/resources/dain-logo.svg" alt="DAIN logo 2" width="200"/>
