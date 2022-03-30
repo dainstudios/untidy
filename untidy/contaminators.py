@@ -5,7 +5,7 @@ import random
 
 """ Column-wise contaminators """
 
-def data_check(data):
+def get_data_dims(data):
     """
     Check input data
 
@@ -16,32 +16,32 @@ def data_check(data):
 
     Returns
     -------
-    row_idxs, col_idxs: int(s)
+    num_rows, num_cols: int(s)
         integers specifying, respectively, the amount of rows and columns in data.
         These values will be passed to *random_indeces* in order to generate the indeces to be contaminated
 
     """
     if isinstance(data, pd.Series):
-        row_idxs = data.shape[0]
-        col_idxs = 2
+        num_rows = data.shape[0]
+        num_cols = 1
 
     elif isinstance(data, pd.DataFrame):
-        row_idxs, col_idxs = data.shape 
+        num_rows, num_cols = data.shape 
         
     else:
         raise TypeError('data should be pd.Series or pd.DataFrame')
 
-    return row_idxs, col_idxs
+    return num_rows, num_cols
 
-def random_indices(row_idxs, col_idxs, corruption_level = 4):
+def get_random_indices(num_rows, num_cols, corruption_level = 4):
     """
     Get random indeces to contaminate
 
     Parameters
     ----------
-    row_idxs: int
+    num_rows: int
         number of rows in data to contaminate
-    col_idxs: int
+    num_cols: int
         number of columns in data to contaminate
     corruption_level int, optional
         level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
@@ -53,26 +53,24 @@ def random_indices(row_idxs, col_idxs, corruption_level = 4):
     """
 
     # define amount of missing values to introduce
-    missing_count = int(row_idxs * col_idxs * corruption_level/10)
+    contamination_fraction = round(num_rows * num_cols * corruption_level/10 * 0.6)
 
     # generate randomized missing values indeces
-    nan_idxs = []
-    while len(nan_idxs) < missing_count:
-        if col_idxs > 1:
-            idx_pair = (random.randint(0, row_idxs-1), random.randint(0, col_idxs-1))
-        else:
-            idx_pair = (random.randint(0, row_idxs-1), )
+    
+    if num_cols>1:
+        cont_idxs = zip(random.choices(range(num_rows), k=contamination_fraction),
+                    random.choices(range(num_cols), k=contamination_fraction))
+    else:
+        cont_idxs = zip(random.choices(range(num_rows), k=contamination_fraction),
+                    [0 for i in range(contamination_fraction)])
 
-        if idx_pair not in nan_idxs:
-            nan_idxs.append(idx_pair)
-
-    return nan_idxs
+    return cont_idxs
 
 
 
 """ Functions to contaminate any columns: """
 
-def nan_values(clean_data, corruption_level = 4):
+def add_nans(clean_data, corruption_level = 4):
     """
     Introduce missing values in clean data
 
@@ -86,15 +84,16 @@ def nan_values(clean_data, corruption_level = 4):
 
     Returns
     -------
-    contaminated data as pd.DataFrame
+    contaminated data as pd.DataFrame or pd.Series
 
     """
     data = clean_data.copy()
+    print(data)
     
-    row_idxs, col_idxs = data_check(data)
+    num_rows, num_cols = get_data_dims(data)
 
-    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level = corruption_level)
-
+    nan_idxs = get_random_indices(num_rows, num_cols, corruption_level = corruption_level)
+    
     # insert missing values
     for x, y in nan_idxs:
         if isinstance(data, pd.DataFrame):
@@ -102,6 +101,7 @@ def nan_values(clean_data, corruption_level = 4):
         else:
             data[x] = np.nan
 
+    print(data)
     return data
 
 
@@ -141,47 +141,54 @@ def add_outliers(clean_data, corruption_level = 4):
 
     """
 
-    data_raw = clean_data.copy()
-    data = data_raw.copy()
+    #data_raw = clean_data.copy()
+    data = clean_data.copy()
+
+    print(data)
 
     # get numerical columns
     if isinstance(data, pd.DataFrame):
-        num_cols = list(data.select_dtypes(include = np.number).columns)
-        data = data[num_cols]
-        num_limits = {col:(data[col].min(),data[col].max()) for col in num_cols}
+        numeric_col = list(data.select_dtypes(include = np.number).columns)
+        data = data[numeric_col]
+        num_limits = {col:(data[col].min(),data[col].max()) for col in numeric_col}
     else:
         num_limits = (data.min(), data.max())
 
     # get data shape
-    row_idxs, col_idxs = data_check(data)
+    num_rows, num_cols = get_data_dims(data)
 
-    nan_idxs = random_indices(row_idxs, col_idxs, corruption_level = corruption_level)
- 
+    ol_idxs = get_random_indices(num_rows, num_cols, corruption_level = corruption_level)
+     
     # random sign function
     coin_flip = lambda: 1 if random.random() > 0.5 else -1
     
     # contaminate data
-    for x, y in nan_idxs:
+    for x, y in ol_idxs:
 
         coin = coin_flip()
-
         if coin>0:
-            # +/- 100 times the max
+            # +100 times the max(1, max_value)
             if isinstance(data, pd.DataFrame):
-                data.iloc[x:x+1, y:y+1] = coin_flip() * num_limits[num_cols[y]][1] * 100
+                data.iloc[x:x+1, y:y+1] = num_limits[numeric_col[y]][1] + max(num_limits[numeric_col[y]][1], 1) * 1000
             else:
-                data[x] = coin_flip() * num_limits[1] * 100
+                data[x] = num_limits[1] + max(1, num_limits[1]) * 1000
         else:
-            # +/- 100 times the min
+            # - 100 times min(-1, min_value)
             if isinstance(data, pd.DataFrame):
-                data.iloc[x:x+1, y:y+1] = coin_flip() * num_limits[num_cols[y]][0] * 100
+                data.iloc[x:x+1, y:y+1] = num_limits[numeric_col[y]][0] - max(num_limits[numeric_col[y]][0], 1) * 1000
             else:
-                data[x] = coin_flip() * num_limits[0] * 100
+                data[x] = num_limits[0] - max(num_limits[0], 1) * 1000
 
     # add contamination to original dataframe
+    
     if isinstance(data, pd.DataFrame):
-        data_raw[num_cols] = data[num_cols]
+        data_contaminated = clean_data.copy()
+        data_contaminated[numeric_col] = data[numeric_col]
     else:
-        data_raw = data
-        
-    return data_raw
+        data_contaminated = data
+    
+    print(data_contaminated)
+
+    return data_contaminated
+
+    """ Functions to contaminate string columns: """
