@@ -51,7 +51,7 @@ def duplicate_rows(data, corruption_level=4):
     Dataset with duplication
     """
     n_rows, _ = data.shape
-    n_rows_duplicated = int(n_rows * corruption_level / 10)
+    n_rows_duplicated = int(n_rows * (0.6 * corruption_level / 10))
 
     selected_df = data.sample(n=n_rows_duplicated, axis=0, replace=False, weights=None)
 
@@ -75,7 +75,7 @@ def duplicate_columns(data, corruption_level=4):
     Dataset with duplication
     """
     _, n_cols = data.shape
-    n_cols_duplicated = int(n_cols * corruption_level / 10)
+    n_cols_duplicated = int(n_cols * (0.6 * corruption_level / 10))
 
     selected_df = data.sample(n=n_cols_duplicated, axis=1, replace=False, weights=None)
 
