@@ -16,5 +16,7 @@ def run(data, corruption_level=4):
     # Read dataset
 
     # Contaminate
+    data_duplicated_row = duplicate_rows(data, corruption_level)
+    data_duplicated_columns = duplicate_columns(data, corruption_level)
 
     # Save / return
