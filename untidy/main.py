@@ -16,6 +16,7 @@ def run(clean_data, corruption_level=4):
     # Read dataset
 
     # Contaminate
+    # TODO add all functions in correct order
     data = clean_data.copy()
     data = add_nans(data, corruption_level=corruption_level)
     data = add_outliers(data, corruption_level=corruption_level)
