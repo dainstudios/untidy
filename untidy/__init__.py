@@ -1,7 +1,11 @@
 from untidy.contaminators import (
+    add_duplicate_rows,
+    add_duplicate_columns,
     add_nans,
-    contaminate_strings_with_noise,
+    add_noise_to_strings,
     add_outliers,
-    duplicate_rows,
-    duplicate_columns,
+    change_str_encoding,
+    change_numeric_to_str,
 )
+
+from untidy.main import untidy

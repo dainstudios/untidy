@@ -9,11 +9,13 @@ Jokes aside, the package can be applied for training purposes, to practice data 
 ```
 messy_df = untidy(clean_df, 
                   corruption_level=4) # how much mess you want (0-10)
-                  add_nans=True, 
-                  add_outliers=True,
-                  add_noise_to_strings=True,
+                  nans=True,
+                  outliers=True,
+                  text_noise=True,
                   mess_with_numbers=True,
-                  mess_with_string_encodings=True)
+                  mess_with_string_encodings=True,
+                  duplicate_rows=True,
+                  duplicate_columns=True)
 ```
 
 

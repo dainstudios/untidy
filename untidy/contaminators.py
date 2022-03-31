@@ -1,14 +1,14 @@
-import pandas as pd
-
 """ Functions to contaminate the data """
-import pandas as pd
+
+# Imports
 import numpy as np
+import pandas as pd
 import random
 
 """ Helpers """
 
 
-def get_random_cols(data, col_type="any", corruption_level=4):
+def get_random_cols(data, col_type="any", corruption_level=4, return_index=False):
     """
     Get random columns to contaminate
 
@@ -21,17 +21,22 @@ def get_random_cols(data, col_type="any", corruption_level=4):
     corruption_level int, optional
         level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
         is the highest level of contamination
+    return_index: boolean, optional
+        Whether to return column indeces. Returns column names if False. Defaults to False.
 
     Returns
     -------
     cols: list
-        list of columns to be contaminated
+        list of columns (indeces or names) to be contaminated
     """
     if col_type.startswith("num"):
         col_type = "num"
 
     # Helpers lambda for sampling columns
-    sampling_cols = lambda data, col_types: [
+    sample_col_names = lambda data, col_types: [
+        col for col in data.select_dtypes(include=col_types).columns
+    ]
+    sample_col_idx = lambda data, col_types: [
         list(data.columns).index(col)
         for col in data.select_dtypes(include=col_types).columns
     ]
@@ -39,9 +44,16 @@ def get_random_cols(data, col_type="any", corruption_level=4):
 
     # Select columns to sample
     if col_type in ["any", "all"]:
-        cols_to_sample = list(range(len(data.columns)))
+        if return_index:
+            cols_to_sample = list(range(len(data.columns)))
+        else:
+            cols_to_sample = list(data.columns)
     else:
-        cols_to_sample = sampling_cols(data, type_dict[col_type])
+        if return_index:
+            cols_to_sample = sample_col_idx(data, type_dict[col_type])
+        else:
+            cols_to_sample = sample_col_names(data, type_dict[col_type])
+
     # Find the number of columns to contaminate
     num_contaminated = [
         int(np.ceil(n)) for n in np.linspace(0, int(len(cols_to_sample)) / 2, 11)
@@ -72,6 +84,8 @@ def get_random_indices(data, col_type="any", corruption_level=4):
     idxs: list
         list of indeces to be contaminated
     """
+    if col_type.startswith("num"):
+        col_type = "num"
 
     # Define the number of datapoints to contaminate
     num_obs = data.values.reshape(1, -1).shape[1]
@@ -83,7 +97,7 @@ def get_random_indices(data, col_type="any", corruption_level=4):
         list(data.columns).index(col)
         for col in data.select_dtypes(include=col_types).columns
     ]
-    type_dict = {"str": ["object", "category"], "num": ["float64", "int64"]}
+    type_dict = {"str": ["object"], "num": ["float64", "int64"]}
 
     if isinstance(data, pd.DataFrame):
         # Find columns to sample from
@@ -161,7 +175,7 @@ def change_str_encoding(clean_data, corruption_level=4):
 
     if isinstance(data, pd.DataFrame):
         # Find random columns to contaminate
-        cols_to_contaminate = get_random_cols(col_type="str")
+        cols_to_contaminate = get_random_cols(data, col_type="str")
 
         # Change encoding of columns
         for col in cols_to_contaminate:
@@ -205,7 +219,7 @@ def change_numeric_to_str(clean_data, corruption_level=4):
 
     if isinstance(data, pd.DataFrame):
         # Find random columns to contaminate
-        cols_to_contaminate = get_random_cols(col_type="numeric")
+        cols_to_contaminate = get_random_cols(data, col_type="numeric")
 
         # Change dtype of columns
         for col in cols_to_contaminate:
@@ -298,9 +312,15 @@ def add_nans(clean_data, corruption_level=4):
         # Replace datapoint with NaN or ?
         nan_val = np.random.choice(["?", np.nan], p=[0.1, 0.9])
         if isinstance(data, pd.DataFrame):
-            data.iloc[idx] = nan_val
+            if data.iloc[:, idx[1]].dtype == "category":
+                data.iloc[idx] = np.nan
+            else:
+                data.iloc[idx] = nan_val
         else:
-            data[idx] = nan_val
+            if data.dtype == "category":
+                data.iloc[idx] = np.nan
+            else:
+                data.iloc[idx] = nan_val
 
     return data
 
@@ -308,7 +328,7 @@ def add_nans(clean_data, corruption_level=4):
 """ Functions for duplications: """
 
 
-def duplicate_rows(data, corruption_level=4):
+def add_duplicate_rows(data, corruption_level=4):
     """
     Add extra rows in a dataset
 
@@ -334,7 +354,7 @@ def duplicate_rows(data, corruption_level=4):
     return data
 
 
-def duplicate_columns(data, corruption_level=4):
+def add_duplicate_columns(data, corruption_level=4):
     """
     Add extra columns in a dataset
 
