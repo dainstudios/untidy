@@ -20,15 +20,16 @@ You can introduce the following problems to your data:
 The package is designed to work with `pandas` DataFrames.
 
 ```
+from untidy import untidyfy
 messy_df = untidyfy(clean_df, 
-                  corruption_level=4, # how much mess you want (0-10)
-                  nans=True,
-                  outliers=True,
-                  text_noise=True,
-                  mess_with_numbers=True,
-                  mess_with_string_encodings=True,
-                  duplicate_rows=True,
-                  duplicate_columns=True)
+                    corruption_level=4, # how much mess you want (0-10)
+                    nans=True,
+                    outliers=True,
+                    text_noise=True,
+                    mess_with_numbers=True,
+                    mess_with_string_encodings=True,
+                    duplicate_rows=True,
+                    duplicate_columns=True)
 ```
 
 ## Installation
