@@ -8,4 +8,4 @@ from untidy.contaminators import (
     change_numeric_to_str,
 )
 
-from untidy.main import untidy
+from untidy.main import untidyfy
