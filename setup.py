@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 setup(
     name="untidy",
     packages=["untidy"],
-    version="0.1.dev1",
+    version="0.0.1.dev1",
     license="MIT",
     description="Python package for creating messy data.",
     author="Paolo Fantinel, Sinem Unal Nazaroglu, Mate Varadi",
