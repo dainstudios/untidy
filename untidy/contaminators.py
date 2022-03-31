@@ -6,6 +6,51 @@ import random
 """ Helpers """
 
 
+def get_random_cols(data, col_type="any", corruption_level=4):
+    """
+    Get random columns to contaminate
+
+    Parameters
+    ----------
+    data: pd.DataFrame
+        clean dataset
+    col_type: str, optional
+        'str', 'numeric' or 'any'. Type of columns to sample.
+    corruption_level int, optional
+        level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
+        is the highest level of contamination
+
+    Returns
+    -------
+    cols: list
+        list of columns to be contaminated
+    """
+    if col_type.startswith("num"):
+        col_type = "num"
+
+    # Helpers lambda for sampling columns
+    sampling_cols = lambda data, col_types: [
+        list(data.columns).index(col)
+        for col in data.select_dtypes(include=col_types).columns
+    ]
+    type_dict = {"str": ["object"], "num": ["float64", "int64"]}
+
+    # Select columns to sample
+    if col_type in ["any", "all"]:
+        cols_to_sample = list(range(len(data.columns)))
+    else:
+        cols_to_sample = sampling_cols(data, type_dict[col_type])
+    # Find the number of columns to contaminate
+    num_contaminated = [
+        int(np.ceil(n)) for n in np.linspace(0, int(len(cols_to_sample)) / 2, 11)
+    ][corruption_level]
+
+    # Sample columns
+    cols = random.choices(cols_to_sample, k=num_contaminated)
+
+    return cols
+
+
 def get_random_indices(data, col_type="any", corruption_level=4):
     """
     Get random indeces to contaminate
@@ -31,21 +76,19 @@ def get_random_indices(data, col_type="any", corruption_level=4):
     prop_contaminated = np.linspace(0, 0.6, 11)[corruption_level]
     num_contaminated = int(prop_contaminated * num_obs)
 
+    # Helpers lambda for sampling columns
+    sampling_cols = lambda data, col_types: [
+        list(data.columns).index(col)
+        for col in data.select_dtypes(include=col_types).columns
+    ]
+    type_dict = {"str": ["object", "category"], "num": ["float64", "int64"]}
+
     if isinstance(data, pd.DataFrame):
         # Find columns to sample from
-        if col_type == "any":
-            cols_to_sample = range(len(data.columns))
-        elif col_type.startswith("str"):
-            cols_to_sample = [
-                list(data.columns).index(col)
-                for col in data.select_dtypes(include=["object", "category"]).columns
-            ]
-        elif col_type.startswith("num"):
-            cols_to_sample = [
-                list(data.columns).index(col)
-                for col in data.select_dtypes(include=["float64", "int64"]).columns
-            ]
-        cols_to_sample = list(cols_to_sample)
+        if col_type in ["any", "all"]:
+            cols_to_sample = list(range(len(data.columns)))
+        else:
+            cols_to_sample = sampling_cols(data, type_dict[col_type])
         sampled_col_idx = random.choices(cols_to_sample, k=num_contaminated)
         sampled_row_idx = random.choices(list(range(len(data))), k=num_contaminated)
         idx = list(set(zip(sampled_row_idx, sampled_col_idx)))
@@ -85,13 +128,11 @@ def add_noise_to_strings(clean_data, corruption_level=4):
     )
 
     # Perform contamination
-    noise_chars = "%&$?!#"
-    whitespace = "  "
+    noise_chars = "%&$?!# "
 
     for idx in idxs_to_contaminate:
-        # add either extra whitespace or a superfluous character
-        noise_char = random.choice(noise_chars)
-        noise = random.choice([noise_char, whitespace])
+        # Add a superfluous character
+        noise = random.choice(noise_chars)
         data.iloc[idx] = str(data.iloc[idx]).replace("nan", "") + noise
 
     return data
@@ -118,15 +159,7 @@ def change_str_encoding(clean_data, corruption_level=4):
 
     if isinstance(data, pd.DataFrame):
         # Find random columns to contaminate
-        str_cols = list(data.select_dtypes(include=["object"]).columns)
-        num_str_cols = len(str_cols)
-        possible_num_cols_to_contaminate = [
-            int(np.ceil(n)) for n in np.linspace(0, int(num_str_cols) / 2, 11)
-        ]
-        num_cols_to_contaminate = possible_num_cols_to_contaminate[corruption_level]
-        cols_to_contaminate = list(
-            np.random.choice(str_cols, num_cols_to_contaminate, replace=False)
-        )
+        cols_to_contaminate = get_random_cols(col_type="str")
 
         # Change encoding of columns
         for col in cols_to_contaminate:
@@ -170,15 +203,7 @@ def change_numeric_to_str(clean_data, corruption_level=4):
 
     if isinstance(data, pd.DataFrame):
         # Find random columns to contaminate
-        numeric_cols = list(data.select_dtypes(include=["float64", "int64"]).columns)
-        num_numeric_cols = len(numeric_cols)
-        possible_num_cols_to_contaminate = [
-            int(np.ceil(n)) for n in np.linspace(0, int(num_numeric_cols) / 2, 11)
-        ]
-        num_cols_to_contaminate = possible_num_cols_to_contaminate[corruption_level]
-        cols_to_contaminate = list(
-            np.random.choice(numeric_cols, num_cols_to_contaminate, replace=False)
-        )
+        cols_to_contaminate = get_random_cols(col_type="numeric")
 
         # Change dtype of columns
         for col in cols_to_contaminate:
@@ -245,6 +270,7 @@ def add_outliers(clean_data, corruption_level=4):
 def add_nans(clean_data, corruption_level=4):
     """
     Introduce missing values in clean data
+
     Parameters
     ----------
     clean_data: pd.Series or pd.DataFrame
@@ -252,9 +278,11 @@ def add_nans(clean_data, corruption_level=4):
     corruption_level: int, optional
         level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
         is the highest level of contamination
+
     Returns
     -------
-    contaminated data as pd.DataFrame or pd.Series
+    data: pd.DataFrame or pd.Series
+        contaminated dataset
     """
     data = clean_data.copy()
 
@@ -264,10 +292,12 @@ def add_nans(clean_data, corruption_level=4):
     )
 
     # Insert missing values
-    for x, y in nan_idxs:
+    for idx in nan_idxs:
+        # Replace datapoint with NaN or ?
+        nan_val = np.random.choice(["?", np.nan], p=[0.1, 0.9])
         if isinstance(data, pd.DataFrame):
-            data.iloc[x, y] = np.nan
+            data.iloc[idx] = nan_val
         else:
-            data[x] = np.nan
+            data[idx] = nan_val
 
     return data
