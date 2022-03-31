@@ -7,7 +7,7 @@ Mess up your dataset just how you like it. A handy tool to use when your data is
 Jokes aside, the package can be applied for training purposes, to practice data cleaning. 
 
 ```
-messy_df = untidy(clean_df, 
+messy_df = untidyfy(clean_df, 
                   corruption_level=4, # how much mess you want (0-10)
                   nans=True,
                   outliers=True,
@@ -20,10 +20,10 @@ messy_df = untidy(clean_df,
 
 
 ## Installation
-Can be installed via pip by downloading the `untidy-0-0-1.dev1.tar.gz` (or any other available release) file under release section. Run the command
+Can be installed via pip by downloading the `untidy-{release-version}.tar` file under release section. Run the command
 
 ```commandline
-pip install untidy-0-0-1.dev1.tar.gz
+pip install `untidy-{release-version}.tar`
 ```
  
 * * *

@@ -1,7 +1,15 @@
-from contaminators import *
+from untidy.contaminators import (
+    add_duplicate_rows,
+    add_duplicate_columns,
+    add_nans,
+    add_noise_to_strings,
+    add_outliers,
+    change_str_encoding,
+    change_numeric_to_str,
+)
 
 
-def untidy(
+def untidyfy(
     clean_data,
     corruption_level=4,
     nans=True,
@@ -39,7 +47,7 @@ def untidy(
 
     Examples
     -------
-    >>> messy_df = untidy(clean_df, corruption_level=7, nans=False)
+    >>> messy_df = untidyfy(clean_df, corruption_level=7, nans=False)
 
     Returns
     -------
