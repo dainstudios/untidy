@@ -303,3 +303,58 @@ def add_nans(clean_data, corruption_level=4):
             data[idx] = nan_val
 
     return data
+
+
+""" Functions for duplications: """
+
+
+def duplicate_rows(data, corruption_level=4):
+    """
+    Add extra rows in a dataset
+
+    Parameters
+    ----------
+    data: pd.DataFrame
+        dataset to be contaminated
+    corruption_level: int, optional
+        level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
+        is the highest level of contamination
+
+    Returns
+    -------
+    data: pd.DataFrame
+        data with duplicated rows
+    """
+    n_rows, _ = data.shape
+    n_rows_duplicated = int(np.ceil(n_rows * (0.2 * corruption_level / 10)))
+
+    dupes = data.sample(n=n_rows_duplicated, axis=0)
+    data = pd.concat([data, dupes], axis=0, ignore_index=True)
+
+    return data
+
+
+def duplicate_columns(data, corruption_level=4):
+    """
+    Add extra columns in a dataset
+
+    Parameters
+    ----------
+    data: pd.DataFrame
+        dataset to be contaminated
+    corruption_level: int, optional
+        level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
+        is the highest level of contamination
+
+    Returns
+    -------
+    data: pd.DataFrame
+        data with duplicated columns
+    """
+    _, n_cols = data.shape
+    n_cols_duplicated = int(np.ceil(n_cols * (0.2 * corruption_level / 10)))
+
+    dupes = data.sample(n=n_cols_duplicated, axis=1)
+    data = pd.concat([data, dupes], axis=1, ignore_index=True)
+
+    return data
