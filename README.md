@@ -20,8 +20,12 @@ messy_df = untidy(clean_df,
 
 
 ## Installation
-TBA 
+Can be installed via pip by downloading the `untidy-0-0-1.dev1.tar.gz` (or any other available release) file under release section. Run the command
 
+```commandline
+pip install untidy-0-0-1.dev1.tar.gz
+```
+ 
 * * *
 
 <p align="center">
