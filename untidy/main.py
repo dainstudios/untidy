@@ -1,7 +1,12 @@
-from contaminators import *
+from untidy.contaminators import *
 
 
-def untidy(
+def _user_log(statement, verbose):
+    if verbose:
+        print(statement)
+
+
+def untidyfy(
     clean_data,
     corruption_level=4,
     nans=True,
@@ -11,6 +16,7 @@ def untidy(
     mess_with_string_encodings=True,
     duplicate_rows=True,
     duplicate_columns=True,
+    verbose=True,
 ):
     """
     Contaminate a dataset with various types of data issues.
@@ -36,32 +42,43 @@ def untidy(
         Whether to duplicate some rows of the data. Defaults to True.
     duplicate_columns: boolean, optional
         Whether to duplicate some columns of the data. Defaults to True.
+    verbose: boolean, optional
 
     Examples
     -------
-    >>> messy_df = untidy(clean_df, corruption_level=7, nans=False)
+    >>> messy_df = untidyfy(clean_df, corruption_level=7, nans=False)
 
     Returns
     -------
     data: pd.DataFrame
         contaminated dataset
     """
+    _user_log("Your dataset is being messed up...", verbose)
     data = clean_data.copy()
 
     # Contaminate
     if outliers:
+        _user_log("\tAdding outliers...", verbose)
         data = add_outliers(data, corruption_level=corruption_level)
     if text_noise:
+        _user_log("\tAdding noise...", verbose)
         data = add_noise_to_strings(data, corruption_level)
     if mess_with_string_encodings:
+        _user_log("\tMessing with strings...", verbose)
         data = change_str_encoding(data, corruption_level)
     if mess_with_numbers:
+        _user_log("\tMessing with numbers....", verbose)
         data = change_numeric_to_str(data, corruption_level)
     if nans:
+        _user_log("\tAdding missing values...", verbose)
         data = add_nans(data, corruption_level=corruption_level)
     if duplicate_rows:
+        _user_log("\tAdding duplicate rows...", verbose)
         data = add_duplicate_rows(data, corruption_level=corruption_level)
     if duplicate_columns:
+        _user_log("\tAdding duplicate columns...", verbose)
         data = add_duplicate_columns(data, corruption_level=corruption_level)
+
+    _user_log("\nYour untidy dataset is ready.", verbose)
 
     return data
