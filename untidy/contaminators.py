@@ -1,3 +1,5 @@
+import pandas as pd
+
 """ Functions to contaminate the data """
 import pandas as pd
 import numpy as np

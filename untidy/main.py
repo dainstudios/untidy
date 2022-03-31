@@ -20,5 +20,7 @@ def run(clean_data, corruption_level=4):
     data = clean_data.copy()
     data = add_nans(data, corruption_level=corruption_level)
     data = add_outliers(data, corruption_level=corruption_level)
+    data = duplicate_rows(data, corruption_level=corruption_level)
+    data = duplicate_columns(data, corruption_level=corruption_level)
 
     # Save / return
