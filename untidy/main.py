@@ -1,10 +1,9 @@
-from untidy.contaminators import *
 
+from untidy.contaminators import *
 
 def _user_log(statement, verbose):
     if verbose:
         print(statement)
-
 
 def untidyfy(
     clean_data,
