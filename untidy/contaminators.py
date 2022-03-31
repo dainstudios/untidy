@@ -4,6 +4,8 @@
 import numpy as np
 import pandas as pd
 import random
+import string
+
 
 """ Helpers """
 
@@ -328,13 +330,13 @@ def add_nans(clean_data, corruption_level=4):
 """ Functions for duplications: """
 
 
-def add_duplicate_rows(data, corruption_level=4):
+def add_duplicate_rows(clean_data, corruption_level=4):
     """
     Add extra rows in a dataset
 
     Parameters
     ----------
-    data: pd.DataFrame
+    clean_data: pd.DataFrame
         dataset to be contaminated
     corruption_level: int, optional
         level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
@@ -345,6 +347,7 @@ def add_duplicate_rows(data, corruption_level=4):
     data: pd.DataFrame
         data with duplicated rows
     """
+    data = clean_data.copy()
     n_rows, _ = data.shape
     n_rows_duplicated = int(np.ceil(n_rows * (0.2 * corruption_level / 10)))
 
@@ -354,13 +357,13 @@ def add_duplicate_rows(data, corruption_level=4):
     return data
 
 
-def add_duplicate_columns(data, corruption_level=4):
+def add_duplicate_columns(clean_data, corruption_level=4):
     """
     Add extra columns in a dataset
 
     Parameters
     ----------
-    data: pd.DataFrame
+    clean_data: pd.DataFrame
         dataset to be contaminated
     corruption_level: int, optional
         level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
@@ -371,10 +374,19 @@ def add_duplicate_columns(data, corruption_level=4):
     data: pd.DataFrame
         data with duplicated columns
     """
+    data = clean_data.copy()
     _, n_cols = data.shape
     n_cols_duplicated = int(np.ceil(n_cols * (0.2 * corruption_level / 10)))
 
     dupes = data.sample(n=n_cols_duplicated, axis=1)
     data = pd.concat([data, dupes], axis=1, ignore_index=True)
+
+    # Add new names to duplicate columns
+    dup_col_names = [c + random.choice(string.ascii_lowercase) for c in dupes.columns]
+    data.columns = clean_data.columns.tolist() + dup_col_names
+
+    # Shuffle the columns of the data
+    new_col_order = np.random.hoice(data.columns, size=len(data.columns), replace=False)
+    data = data[new_col_order]
 
     return data
