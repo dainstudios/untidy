@@ -2,9 +2,22 @@
 A Python library for uncleaning your dataset.
 
 ## Overview
-Mess up your dataset just how you like it. A handy tool to use when your data is too clean. 
+Have you ever wondered how to introduce specific problems to your clean data? Now you can apply our out-of-the-box solution to untidy your data according to your needs.
 
-Jokes aside, the package can be applied for training purposes, to practice data cleaning. 
+The solution can be used primarily for educational purposes, where clean example data is made more realistic.
+
+Real world data is often poised with missing values, datetime issues, data type mismatches, string encoding problems.
+
+You can introduce the following problems to your data:
+* Adding missing values
+* Adding outliers
+* Changing the encoding of strings
+* Changing the data type of numeric columns to strings
+* Adding duplicate rows
+* Adding duplicate columns
+* Adding extra characters to strings
+
+The package is designed to work with `pandas` DataFrames.
 
 ```
 messy_df = untidyfy(clean_df, 
@@ -18,12 +31,11 @@ messy_df = untidyfy(clean_df,
                   duplicate_columns=True)
 ```
 
-
 ## Installation
-Can be installed via pip by downloading the `untidy-{release-version}.tar` file under release section. Run the command
+Can be installed via pip by downloading the `untidy-{release-version}.tar.gz` file under release section. Run the command
 
 ```commandline
-pip install `untidy-{release-version}.tar`
+pip install `untidy-{release-version}.tar.gz`
 ```
  
 * * *
