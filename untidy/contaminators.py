@@ -392,7 +392,9 @@ def add_duplicate_columns(clean_data, corruption_level=4):
     data.columns = clean_data.columns.tolist() + dup_col_names
 
     # Shuffle the columns of the data
-    new_col_order = np.random.hoice(data.columns, size=len(data.columns), replace=False)
+    new_col_order = np.random.choice(
+        data.columns, size=len(data.columns), replace=False
+    )
     data = data[new_col_order]
 
     return data
