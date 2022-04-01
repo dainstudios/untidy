@@ -146,7 +146,7 @@ def test_add_outliers():
 
 def test_add_nans():
     nan_df = add_nans(data)
-
+    print("result df:", nan_df.info())
     # check for missing values or '?' characters
     assert (nan_df == np.nan).any().any() or (nan_df == "?").any().any()
 
