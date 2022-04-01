@@ -312,17 +312,23 @@ def add_nans(clean_data, corruption_level=4):
     # Insert missing values
     for idx in nan_idxs:
         # Replace datapoint with NaN or ?
-        nan_val = np.random.choice(["?", np.nan], p=[0.1, 0.9])
+        biased_coin_flip = np.random.choice([0, 1], p=[0.1, 0.9])
         if isinstance(data, pd.DataFrame):
             if data.iloc[:, idx[1]].dtype == "category":
                 data.iloc[idx] = np.nan
             else:
-                data.iloc[idx] = nan_val
+                if biased_coin_flip == 1:
+                    data.iloc[idx] = np.nan
+                else:
+                    data.iloc[idx] = "?"
         else:
             if data.dtype == "category":
                 data.iloc[idx] = np.nan
             else:
-                data.iloc[idx] = nan_val
+                if biased_coin_flip == 1:
+                    data.iloc[idx] = np.nan
+                else:
+                    data.iloc[idx] = "?"
 
     return data
 
