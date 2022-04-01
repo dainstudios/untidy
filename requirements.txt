@@ -1,4 +1,2 @@
 numpy>=1.10.4
 pandas>=0.17.1
-seaborn>=0.7.0
-pytest>=6.2.0
