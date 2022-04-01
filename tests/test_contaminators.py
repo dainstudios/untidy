@@ -1,8 +1,17 @@
-import pytest
 import pandas as pd
 import numpy as np
 
-from untidy.contaminators import *
+from untidy.contaminators import (
+    get_random_cols,
+    get_random_indices,
+    add_noise_to_strings,
+    change_str_encoding,
+    change_numeric_to_str,
+    add_nans,
+    add_duplicate_rows,
+    add_outliers,
+    add_duplicate_columns,
+)
 
 data = pd.DataFrame(
     {
@@ -139,7 +148,7 @@ def test_add_nans():
     nan_df = add_nans(data)
 
     # check for missing values or '?' characters
-    assert (nan_df == "nan").any().any() or (nan_df == "?").any().any()
+    assert (nan_df == np.nan).any().any() or (nan_df == "?").any().any()
 
 
 """ Functions for duplications: """

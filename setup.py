@@ -3,10 +3,23 @@ from setuptools import setup
 with open("README.md", "r") as f:
     long_description = f.read()
 
+# Use requirements.txt to set the install_requires
+with open("requirements.txt") as f:
+    install_requires = [line.strip() for line in f]
+
+# Use requirements-dev.txt and requirements-examples.txt to set the extras_require
+extras_require = {}
+with open("requirements-dev.txt") as f:
+    extras_require = {"dev": [line.strip() for line in f]}
+
+with open("requirements-examples.txt") as f:
+    extras_require = {"examples": [line.strip() for line in f]}
+
+
 setup(
     name="untidy",
     packages=["untidy"],
-    version="0.0.1.dev2",
+    version="0.0.1-alpha",
     license="MIT",
     description="Python package for creating messy data.",
     author="Paolo Fantinel, Sinem Unal Nazaroglu, Mate Varadi",
@@ -15,7 +28,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/dainstudios/untidy",
-    install_requires=["pandas"],
+    install_requires=install_requires,
+    extras_require=extras_require,
     classifiers=[
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
