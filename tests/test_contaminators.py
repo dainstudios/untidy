@@ -148,7 +148,7 @@ def test_add_nans():
     nan_df = add_nans(data)
 
     # check for missing values or '?' characters
-    assert (nan_df == "nan").any().any() or (nan_df == "?").any().any()
+    assert (nan_df == np.nan).any().any() or (nan_df == "?").any().any()
 
 
 """ Functions for duplications: """
