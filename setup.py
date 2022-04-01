@@ -16,6 +16,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/dainstudios/untidy",
     install_requires=["pandas"],
+    extras_require={"dev": ["pytest"]},
     classifiers=[
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
