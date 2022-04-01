@@ -17,7 +17,7 @@ def test_get_random_cols():
 	num_idx = get_random_cols(data, 'num', return_index = True)
 	num_name = get_random_cols(data, 'num', return_index = False)
 
-	#check outputs
+	#check outputs are correct
 	assert str_idx in [[2], [3]], f"got {str_idx} instead of [2] or [3]"
 	assert str_name in [['str1'], ['str2']], f"got {str_name} instead of ['str1'] or ['str2']"
 	assert num_idx in [[0], [1]], f"got {num_idx} instead of [0] or [1]"
@@ -50,11 +50,14 @@ def test_get_random_indices():
 def test_add_noise_to_strings():
     noisy_strings = add_noise_to_strings(data)
  	
+ 	# check that numeric columns are untouched
     assert data.select_dtypes(include=['float64', 'int64']).equals(
     	noisy_strings.select_dtypes(include=['float64', 'int64'])), "numeric columns should stay the same"
+    # check that string columns are different
     assert not data.select_dtypes(include='object').equals(
     	noisy_strings.select_dtypes(include='object')), "string columns should be different"
 
+    # Check that removing noise characters reverts the function
     for col in noisy_strings.select_dtypes(include='object').columns:
     	for char in "%&$?!# ":
     		noisy_strings[col] = noisy_strings[col].map(lambda x: x.replace(char,""))
@@ -63,7 +66,9 @@ def test_add_noise_to_strings():
 
 
 def test_change_str_encoding():
-    assert True
+	encoded_str = change_str_encoding(data)
+
+	assert isinstance(encoded_str.str1[0], bytes) or isinstance(encoded_str.str2[0], bytes) 
 
 """ Functions to contaminate numerical columns """
 
@@ -73,23 +78,36 @@ def test_change_numeric_to_str():
 	str_cols = data.select_dtypes(include='object').columns
 	num_cols = data.select_dtypes(include=['float64','int64']).columns
 
+    # check str columns are untouched
 	assert data_type[str_cols].equals(data[str_cols])
+	# check numeric columns are different
 	assert not data_type[num_cols].equals(data[num_cols])
+    # check that some numeric columns are now strings
 	assert len(list(set(data_type[num_cols].select_dtypes(include='object').columns) - set(str_cols))) > 0 
 
 def test_add_outliers():
-    assert True
+	outlier_df = add_outliers(data)
+
+    # check that larger values are now in numeric columns  
+	assert (outlier_df['num1'] - data['num1'] > 0).any()
+	assert (outlier_df['num2'] - data['num2'] > 0).any()
 
 """ Functions to contaminate any column """
 
-
 def test_add_nans():
-    data_nan = add_nans(data)
+    nan_df = add_nans(data)
+
+    # check for missing values or '?' characters
+    assert (nan_df == 'nan').any().any() or (nan_df == '?').any().any() 
 
 """ Functions for duplications: """
 
 def test_add_duplicate_rows():
-    assert True
+    dup_rows = add_duplicate_rows(data)
+
+    assert dup_rows.shape[0]>data.shape[0]
+    assert dup_rows.drop_duplicates().equals(data)
 
 def test_add_duplicate_columns():
-	assert True
+	dup_cols = add_duplicate_columns(data)
+	assert dup_cols.shape[1]>data.shape[1]
