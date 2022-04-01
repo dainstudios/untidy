@@ -1,8 +1,17 @@
-import pytest
 import pandas as pd
 import numpy as np
 
-from untidy.contaminators import *
+from untidy.contaminators import (
+    get_random_cols,
+    get_random_indices,
+    add_noise_to_strings,
+    change_str_encoding,
+    change_numeric_to_str,
+    add_nans,
+    add_duplicate_rows,
+    add_outliers,
+    add_duplicate_columns,
+)
 
 data = pd.DataFrame(
     {
