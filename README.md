@@ -1,6 +1,7 @@
 # Untidy
 A Python library for uncleaning your dataset.
 
+[![Check
 status](https://github.com/dainstudios/untidy/actions/workflows/check.yml/badge.svg)](https://github.com/dainstudios/untidy/actions/workflows/check.yml)
 
 ## Overview
