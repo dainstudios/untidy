@@ -1,7 +1,6 @@
 """ Functions to contaminate the data """
 
 # Imports
-from audioop import bias
 import numpy as np
 import pandas as pd
 import random
