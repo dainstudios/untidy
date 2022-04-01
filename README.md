@@ -1,6 +1,8 @@
 # Untidy
 A Python library for uncleaning your dataset.
 
+status](https://github.com/dainstudios/untidy/actions/workflows/check.yml/badge.svg)](https://github.com/dainstudios/untidy/actions/workflows/check.yml)
+
 ## Overview
 Have you ever wondered how to introduce specific problems to your clean data? Now you can apply our out-of-the-box solution to untidy your data according to your needs.
 
