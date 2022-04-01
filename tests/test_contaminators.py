@@ -154,4 +154,4 @@ def test_add_duplicate_rows():
 
 def test_add_duplicate_columns():
     dup_cols = add_duplicate_columns(data)
-    assert dup_cols.shape[1] >= data.shape[1]
+    assert dup_cols.shape[1] > data.shape[1]
