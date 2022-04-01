@@ -308,7 +308,7 @@ def add_nans(clean_data, corruption_level=4):
     nan_idxs = get_random_indices(
         data, col_type="any", corruption_level=corruption_level
     )
-    print("nan indx:", nan_idxs)
+
     # Insert missing values
     for idx in nan_idxs:
         # Replace datapoint with NaN or ?
