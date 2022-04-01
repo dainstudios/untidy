@@ -139,7 +139,7 @@ def test_add_nans():
     nan_df = add_nans(data)
 
     # check for missing values or '?' characters
-    assert (nan_df == "nan").any().any() or (nan_df == "?").any().any()
+    assert (nan_df == np.nan).any().any() or (nan_df == "?").any().any()
 
 
 """ Functions for duplications: """
@@ -154,4 +154,4 @@ def test_add_duplicate_rows():
 
 def test_add_duplicate_columns():
     dup_cols = add_duplicate_columns(data)
-    assert dup_cols.shape[1] > data.shape[1]
+    assert dup_cols.shape[1] >= data.shape[1]
