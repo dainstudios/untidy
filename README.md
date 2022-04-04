@@ -36,7 +36,7 @@ messy_df = untidyfy(clean_df,
 ```
 
 ## Installation
-Can be installed via pip by downloading the `untidy-{release-version}.tar.gz` file under release section. Run the command
+Can be installed via directly via pip or by downloading the `untidy-{release-version}.tar.gz` file under release section. Run the command
 
 ```commandline
 pip install `untidy-{release-version}.tar.gz`
