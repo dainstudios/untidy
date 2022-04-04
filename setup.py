@@ -19,7 +19,7 @@ with open("requirements-examples.txt") as f:
 setup(
     name="untidy",
     packages=["untidy"],
-    version="0.0.1-alpha2",
+    version="0.0.1-alpha1",
     license="MIT",
     description="Python package for creating messy data.",
     author="Paolo Fantinel, Sinem Unal Nazaroglu, Mate Varadi",
