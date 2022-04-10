@@ -156,6 +156,35 @@ def add_noise_to_strings(clean_data, corruption_level=4):
     return data
 
 
+def change_str_case_style(clean_data, corruption_level=4):
+    """
+    Breaks the styling of the string, randomly changes lowercases to uppercase and vice versa.
+    Parameters
+    ----------
+    clean_data: pd.Series or pd.DataFrame
+        data to be contaminated with superfluous characters
+    corruption_level: int, optional
+        level of corruption, should be between 0 and 10, where 0 leaves the dataset as is, 10
+        is the highest level of contamination
+    Returns
+    -------
+    data: pd.DataFrame or pd.Series
+        contaminated dataset
+    """
+    data = clean_data.copy()
+
+    # Find data cells to contaminate
+    idxs_to_contaminate = get_random_indices(
+        data, col_type="str", corruption_level=corruption_level
+    )
+
+    # Perform contamination
+    for idx in idxs_to_contaminate:
+        # Swap the cases of the string
+        data.iloc[idx] = str(data.iloc[idx]).swapcase()
+    return data
+
+
 def change_str_encoding(clean_data, corruption_level=4):
     """
     Changes the string encoding of text data.

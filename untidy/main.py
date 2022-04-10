@@ -12,6 +12,7 @@ def untidyfy(
     nans=True,
     outliers=True,
     text_noise=True,
+    case_style=True,
     mess_with_numbers=True,
     mess_with_string_encodings=True,
     duplicate_rows=True,
@@ -63,6 +64,9 @@ def untidyfy(
     if text_noise:
         _user_log("\tAdding noise...", verbose)
         data = add_noise_to_strings(data, corruption_level)
+    if case_style:
+        _user_log("\tChanging case style...", verbose)
+        data = change_str_case_style(data, corruption_level)
     if mess_with_string_encodings:
         _user_log("\tMessing with strings...", verbose)
         data = change_str_encoding(data, corruption_level)

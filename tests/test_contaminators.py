@@ -100,6 +100,19 @@ def test_add_noise_to_strings():
     assert noisy_strings.equals(data), "check remaining noise characters"
 
 
+def test_change_str_case_style():
+    case_change = add_noise_to_strings(data)
+
+    # check that numeric columns are untouched
+    assert data.select_dtypes(include=["float64", "int64"]).equals(
+        case_change.select_dtypes(include=["float64", "int64"])
+    ), "numeric columns should stay the same"
+    # check that string columns are different
+    assert not data.select_dtypes(include="object").equals(
+        case_change.select_dtypes(include="object")
+    ), "string columns should be different"
+
+
 def test_change_str_encoding():
     encoded_str = change_str_encoding(data)
 
