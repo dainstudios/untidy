@@ -360,6 +360,11 @@ def add_duplicate_rows(clean_data, corruption_level=4):
     dupes = data.sample(n=n_rows_duplicated, axis=0)
     data = pd.concat([data, dupes], axis=0, ignore_index=True)
 
+    # Shuffle the columns of the data
+    new_idx_order = np.random.choice(data.index, size=len(data.index), replace=False)
+    data = data.iloc[new_idx_order]
+    data = data.reindex(range(len(data)))
+
     return data
 
 
